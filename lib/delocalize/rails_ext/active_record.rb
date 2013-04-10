@@ -30,8 +30,8 @@ ActiveRecord::Base.class_eval do
     end 
     # <<<<<< keep the original inputted_value to be used in case of errors
     
-    puts "DELOCALIZE #{original_value} -> #{new_value}" 
-    #inputted_values[attr_name.to_sym] = original_value
+    puts "DELOCALIZE MODEL #{original_value} -> #{new_value}" 
+    inputted_values[attr_name.to_sym] = original_value
  
     # >>>>>>>
     write_attribute_without_localization(attr_name, new_value)
