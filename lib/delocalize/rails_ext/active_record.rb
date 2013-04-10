@@ -27,20 +27,34 @@ ActiveRecord::Base.class_eval do
       elsif column.time?
         new_value = Time.parse_localized(original_value) rescue original_value
       end
-    end
+    end 
+    # <<<<<< keep the original inputted_value to be used in case of errors
+    
+    puts "DELOCALIZE #{original_value} -> #{new_value}" 
+    #inputted_values[attr_name.to_sym] = original_value
+ 
+    # >>>>>>>
     write_attribute_without_localization(attr_name, new_value)
   end
   alias_method_chain :write_attribute, :localization
+
+  
+  # <<<<<< 
+  #keep the original inputted_value to be used in case of errors
+  def inputted_values
+     @inputted_values ||= {}
+  end
+  # >>>>>>
 
   def convert_number_column_value_with_localization(value)
     value = convert_number_column_value_without_localization(value)
     value = Numeric.parse_localized(value) if I18n.delocalization_enabled?
     value
   end
+
   alias_method_chain :convert_number_column_value, :localization
 
-
-  define_method( (Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('3.2.9')) ? :field_changed? : :_field_changed? ) do |attr, old, value|
+  def field_changed?(attr, old, value)
     if column = column_for_attribute(attr)
       if column.number? && column.null && (old.nil? || old == 0) && value.blank?
         # For nullable numeric columns, NULL gets stored in database for blank (i.e. '') values.
@@ -54,6 +68,7 @@ ActiveRecord::Base.class_eval do
         value = column.type_cast(value)
       end
     end
+
     old != value
   end
 end
